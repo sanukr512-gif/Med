@@ -127,7 +127,7 @@ function saveData(){
  alert("Saved");
 }
 
-// ✅ UPDATED MEDICINE SYSTEM
+// ✅ MEDICINE
 function addMed(name,price){
  let dose = prompt("Kitni baar leni hai? (e.g. 2)");
  let time = prompt("Day ya Night? (day/night)");
@@ -137,13 +137,11 @@ function addMed(name,price){
   return;
  }
 
- let icon = time.toLowerCase()=="day" ? "🌞" : "🌙";
-
- medicines.push({name,price,dose,time,icon});
+ medicines.push({name,price,dose,time});
  total+=price;
 
  document.getElementById("cart").innerText =
- medicines.map(m=> m.name+" "+m.icon+" ("+m.dose+"x)").join(", ");
+ medicines.map(m=> m.name+" ("+m.time.toUpperCase()+") "+m.dose+"x").join(", ");
 
  document.getElementById("total").innerText="Total ₹"+total;
 }
@@ -175,86 +173,66 @@ function payNow(){
  downloadPDF();
 }
 
-// ✅ UPDATED PDF
+// ✅ PDF FIXED
 function downloadPDF(){
  const { jsPDF } = window.jspdf;
  const doc = new jsPDF();
 
  let y=20;
 
- doc.setFontSize(16);
- doc.text("PHARMACY 1ST YEAR SEC (B)",20,y);
- y+=10;
-
- doc.setFontSize(12);
- doc.text("Health Care Prescription",20,y);
- y+=15;
-
+ doc.text("Health Care Prescription",20,y); y+=10;
  doc.text("Date: "+getDateTime(),20,y); y+=10;
-
- if(patientImage){
-  doc.addImage(patientImage,'JPEG',150,20,40,40);
- }
 
  doc.text("Name: "+val("name"),20,y); y+=10;
  doc.text("Age: "+val("age"),20,y); y+=10;
- doc.text("Address: "+val("address"),20,y); y+=10;
 
  y+=10;
-
- doc.text("BP: "+val("bp"),20,y); y+=10;
- doc.text("Temp: "+val("temp"),20,y); y+=10;
- doc.text("Pulse: "+val("pulse"),20,y); y+=15;
 
  doc.text("Medicines:",20,y); y+=10;
 
  medicines.forEach(m=>{
-  doc.text(m.name+" "+m.icon+" - "+m.dose+" times ₹"+m.price,20,y);
+  doc.text(m.name+" ("+m.time.toUpperCase()+") - "+m.dose+" times ₹"+m.price,20,y);
   y+=10;
  });
 
- doc.text("Total ₹"+total,20,y); y+=15;
-
- doc.text("Doctor: "+val("docName"),20,y); y+=10;
- doc.text("Signature: ____________",20,y);
-
- y+=25;
-
- // 🔴 ROUND STAMP
- doc.setDrawColor(255,0,0);
- doc.circle(105,y,30);
-
- doc.setTextColor(255,0,0);
- doc.setFontSize(10);
- doc.text("GOVT OF INDIA",85,y-5);
- doc.text("APPROVED",95,y);
- doc.text("HEALTH DEPT",85,y+5);
+ doc.text("Total ₹"+total,20,y);
 
  doc.save("Prescription.pdf");
 }
 
+// ✅ IMPROVED HINDI VOICE
+function speak(text){
+ let msg = new SpeechSynthesisUtterance(text);
+ let voices = speechSynthesis.getVoices();
+ let hindiVoice = voices.find(v => v.lang === "hi-IN");
+
+ if(hindiVoice){
+   msg.voice = hindiVoice;
+ }
+
+ msg.lang="hi-IN";
+ msg.rate=0.9;
+
+ speechSynthesis.speak(msg);
+}
+
 function callDoctor(){
  window.location.href="tel:9876543210";
- speak("Doctor ko call kiya ja raha hai");
+ speak("डॉक्टर को कॉल किया जा रहा है");
 }
 
 function sendEmergency(){
  navigator.geolocation.getCurrentPosition(pos=>{
   document.getElementById("locStatus").innerText=
    "Location: "+pos.coords.latitude+", "+pos.coords.longitude;
-  speak("Doctor aapse jaldi milenge");
+
+  speak("डॉक्टर आपसे जल्द ही संपर्क करेंगे, कृपया निश्चिंत रहें");
  });
 }
 
 function callAmbulance(){
  window.location.href="tel:108";
- speak("Ambulance call ho rahi hai");
-}
-
-function speak(text){
- let msg=new SpeechSynthesisUtterance(text);
- msg.lang="hi-IN";
- speechSynthesis.speak(msg);
+ speak("एम्बुलेंस को कॉल किया जा रहा है");
 }
 
 function val(id){return document.getElementById(id).value;}
